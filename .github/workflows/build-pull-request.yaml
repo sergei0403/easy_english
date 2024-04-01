@@ -10,6 +10,12 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      DB_NAME:postgres
+      DB_USER:postgres
+      DB_PASSWORD:postgres
+      POSTGRES_HOST:database
+      DB_PORTP:5432
     steps:
       - uses: actions/checkout@v2
           
@@ -27,13 +33,14 @@ jobs:
           poetry install
 
       - name: Start test database
-        run: docker-compose -f docker-compose.test.yml run --rm wait-for-it -t 60 database:5432 -- alembic upgrade head
+        run: docker-compose -f docker-compose.test.yml up -d
 
           
       - name: Run tests
         run: |
           cd backend/src
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          alembic upgrade head
           pytest -p no:warnings tests/
       
       - name: Stop test database
