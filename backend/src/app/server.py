@@ -8,7 +8,7 @@ from routers import include_routes
 
 
 def init_app():
-    # Ініціалізація бази данних 
+    # Ініціалізація бази данних
     db.init()
 
     # Ініціалізація застосунку FastAPI
@@ -27,7 +27,6 @@ def init_app():
         await db.close()
 
     _app.add_event_handler("shutdown", shutdown_event)
-    
 
     # Налаштування CORS
     _app.add_middleware(

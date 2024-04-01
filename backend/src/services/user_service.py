@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete, insert
+from sqlalchemy import select, delete, insert  # update,
 
 from app.core.database import db
 from schemas.auth_schemas import RegisterSchema

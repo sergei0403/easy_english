@@ -1,7 +1,6 @@
-from sqlalchemy import select, update, delete, insert
+from sqlalchemy import insert
 
 from app.core.database import db
-from schemas.auth_schemas import RegisterSchema
 from models import Vocabulary
 
 

@@ -14,7 +14,7 @@ class User(Base):
     last_name = Column(String)
 
     vocabularies = relationship("models.vocabulary.Vocabulary", back_populates="user")
-    
+
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email}>"
 

@@ -1,12 +1,12 @@
 import pytest
 
-from unittest.mock import patch
+# from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from httpx import AsyncClient
 
 from app.server import app
-from tests.utils_for_test import create_test_user, generate_test_token, remove_test_user
+from utils.utils_for_test import create_test_user, generate_test_token, remove_test_user
 
 client = TestClient(app)
 
