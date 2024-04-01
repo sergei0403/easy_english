@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = os.environ.get("DB_PASSWORD", "postgres")
     DB_HOST: str = os.environ.get("DB_HOST", "database")
     DB_PORT: int = int(os.environ.get("DB_PORT", 5432))
+    
+    IS_TEST_DATABASE: bool = os.environ.get("IS_TEST_DATABASE", False)
 
     DATABASE_DSN: str = (
         f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
