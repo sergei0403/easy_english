@@ -3,9 +3,9 @@ name: easy_english CI/CD
 on:
   pull_request:
     branches:
-      - "master"
-      - "main"
-      - "develop"
+      - master
+      - main
+      - develop
 
 jobs:
   test:
@@ -30,7 +30,7 @@ jobs:
           cd backend
           pytest src/tests/
 
-lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
