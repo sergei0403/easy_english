@@ -3,9 +3,9 @@ name: easy_english CI/CD
 on:
   pull_request:
     branches:
-      - "master"
-      - "main"
-      - "develop"
+      - master
+      - main
+      - develop
 
 jobs:
   test:
