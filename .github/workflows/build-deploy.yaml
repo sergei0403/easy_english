@@ -24,6 +24,7 @@ jobs:
           pip install poetry
           cd backend
           poetry install
+          source "$(poetry env info --path)/bin/activate"
           
       - name: Run tests
         run: |
