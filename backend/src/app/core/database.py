@@ -27,7 +27,6 @@ class AsyncDatabaseSession:
             await conn.run_sync(Base.metadata.create_all)
 
 
-# Update for testing with SQLite
 class TestDatabaseSession():
     def __init__(self):
         self._session = None
@@ -46,6 +45,7 @@ class TestDatabaseSession():
     async def create_all(self):
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
 
 if settings.IS_TEST_DATABASE:
     print(f"{settings.IS_TEST_DATABASE=}")

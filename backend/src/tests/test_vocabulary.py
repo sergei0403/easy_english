@@ -7,7 +7,6 @@ from httpx import AsyncClient
 
 from app.server import app
 from app.core.database import db
-from models import Base
 from utils.utils_for_test import create_test_user, generate_test_token, remove_test_user
 
 client = TestClient(app)
