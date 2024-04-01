@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Start test database
+        run: docker-compose -f docker-compose.test.yml up -d
       
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -31,6 +34,9 @@ jobs:
           cd backend/src
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
           pytest -p no:warnings tests/
+      - name: Stop test database
+        run: docker-compose -f docker-compose.test.yml down
+
 
   lint:
     runs-on: ubuntu-latest
