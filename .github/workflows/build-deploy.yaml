@@ -29,7 +29,7 @@ jobs:
           cd backend
           poetry install
       
-       - name: Apply migrations
+      - name: Apply migrations
         run: |
           cd backend/src
           alembic upgrade head
