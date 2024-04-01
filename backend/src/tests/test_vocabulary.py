@@ -31,5 +31,3 @@ async def test_read_main():
         await remove_test_user(email=user.email)
         assert response.status_code == 200
     await teardown()
-
-
