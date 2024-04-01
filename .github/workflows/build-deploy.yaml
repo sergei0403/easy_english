@@ -22,9 +22,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install poetry
+          poetry config virtualenvs.create false
           cd backend
           poetry install
-          source "$(poetry env info --path)/bin/activate"
           
       - name: Run tests
         run: |
@@ -48,4 +48,5 @@ jobs:
           
       - name: Run Flake8
         run: |
-          flake8 backend/
+          cd backend
+          flake8 --config ../.flake8
