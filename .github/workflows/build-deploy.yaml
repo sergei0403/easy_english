@@ -28,12 +28,16 @@ jobs:
           poetry config virtualenvs.create false
           cd backend
           poetry install
-          
+      
+       - name: Apply migrations
+        run: |
+          cd backend/src
+          alembic upgrade head
+
       - name: Run tests
         run: |
           cd backend/src
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-          alembic upgrade head
           pytest -p no:warnings tests/
       
       - name: Stop test database
