@@ -32,26 +32,22 @@ class GetVocabularySchema(BaseModel):
         from_attributes = True
 
 
-vocabulary_router = APIRouter(prefix='/vocabularies')
+vocabulary_router = APIRouter(prefix="/vocabularies")
 
 
 @vocabulary_router.get("/user_vocabulary/", response_model=list[GetVocabularySchema])
 async def get_user_vocabularis(user: AuthenticatedUser = Depends(get_current_user)):
     query = await db.execute(
-        select(Vocabulary).where(Vocabulary.user_id == user.id).options(
-            joinedload(Vocabulary.user))
+        select(Vocabulary)
+        .where(Vocabulary.user_id == user.id)
+        .options(joinedload(Vocabulary.user))
     )
     return query.scalars().all()
 
 
 @vocabulary_router.get("/", response_model=list[GetVocabularySchema])
-async def get_vocabularis(
-    user: AuthenticatedUser = Depends(get_current_user)
-):
-    query = await db.execute(
-        select(Vocabulary).options(
-            joinedload(Vocabulary.user))
-    )
+async def get_vocabularis(user: AuthenticatedUser = Depends(get_current_user)):
+    query = await db.execute(select(Vocabulary).options(joinedload(Vocabulary.user)))
     return query.scalars().all()
 
 
@@ -63,28 +59,28 @@ async def create_vocabulary(
     item_dict["user_id"] = user.id
     await db.execute(
         insert(Vocabulary).values(
-            name=item_dict.get("name"),
-            user_id=item_dict.get("user_id")
+            name=item_dict.get("name"), user_id=item_dict.get("user_id")
         )
     )
     await db.commit()
     return Response(status_code=201)
 
+
 @vocabulary_router.patch("/{vocabulary_id}/")
 async def update_vocabulary(
     vocabulary_id: int,
     item: CreateVocabularySchema,
-    user: AuthenticatedUser = Depends(get_current_user)
+    user: AuthenticatedUser = Depends(get_current_user),
 ):
-    existing_vocabulary = await db.execute(select(Vocabulary).where(Vocabulary.id == vocabulary_id))
+    existing_vocabulary = await db.execute(
+        select(Vocabulary).where(Vocabulary.id == vocabulary_id)
+    )
     if existing_vocabulary is None:
         return Response(status_code=404, content="Vocabulary not found")
 
     # Update the vocabulary item with the new data
     await db.execute(
-        update(Vocabulary).where(Vocabulary.id == vocabulary_id).values(
-            name=item.name
-        )
+        update(Vocabulary).where(Vocabulary.id == vocabulary_id).values(name=item.name)
     )
     await db.commit()
     return Response(status_code=204)
@@ -92,13 +88,13 @@ async def update_vocabulary(
 
 @vocabulary_router.delete("/{vocabulary_id}/")
 async def delete_vocabulary(
-    vocabulary_id: int,
-    user: AuthenticatedUser = Depends(get_current_user)
+    vocabulary_id: int, user: AuthenticatedUser = Depends(get_current_user)
 ):
-    existing_vocabulary = await db.execute(delete(Vocabulary).where(
-        Vocabulary.id == vocabulary_id,
-        Vocabulary.user_id == user.id
-    ))
+    existing_vocabulary = await db.execute(
+        delete(Vocabulary).where(
+            Vocabulary.id == vocabulary_id, Vocabulary.user_id == user.id
+        )
+    )
     if existing_vocabulary is None:
         return Response(status_code=404, content="Vocabulary not found")
     return Response(status_code=201)
