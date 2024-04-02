@@ -1,28 +1,17 @@
-from sqlalchemy import select, update, delete, insert
+from sqlalchemy import insert
 
 from app.core.database import db
-from schemas.auth_schemas import RegisterSchema
-from models import User
+from models import Vocabulary
 
 
-class VocabularyDBService():
+class VocabularyDBService:
     def __init__(self) -> None:
         self.__db_session = db
 
-    async def get_user_by_email(self, email: str) -> User:
-        query = await self.__db_session.execute(
-            select(User).where(User.email == email)
-        )
-        return query.scalars().first()
-
-    async def create_vocabulary(self, user_item: RegisterSchema) -> None:
+    async def create_vocabulary(self, item_dict: dict) -> None:
         await self.__db_session.execute(
-            insert(User).values(
-                email=user_item.email,
-                login=user_item.login,
-                password=user_item.password,
-                first_name=user_item.first_name,
-                last_name=user_item.last_name
+            insert(Vocabulary).values(
+                name=item_dict.get("name"), user_id=item_dict.get("user_id")
             )
         )
-        await db.commit()
+        await self.__db_session.commit()

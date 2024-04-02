@@ -12,12 +12,13 @@ from utils.jwt_token import generate_token, decode_token, generate_token_data
 from models import User
 from services.user_service import UserDBService
 
+
 class UserSchema(BaseModel):
     id: int
     email: str
 
 
-class TokennRedisModel():
+class TokennRedisModel:
     user_id: int
     jti: str
     access: str
@@ -36,7 +37,7 @@ class TokennRedisModel():
             "user_id": self.user_id,
             "jti": self.jti,
             "access": self.access,
-            "refresh": self.refresh
+            "refresh": self.refresh,
         }
 
 
@@ -93,12 +94,22 @@ class StoreTokenRedis(BaseStoreToken):
         else:
             user = UserSchema(**user.__dict__)
         token_data = generate_token_data(
-            user=user, jti=jti, live_time=settings.ACCESS_TOKEN_EXPIRE_MINUTES, token_type="access")
+            user=user,
+            jti=jti,
+            live_time=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+            token_type="access",
+        )
         access_token = generate_token(token_data=token_data)
         token_data = generate_token_data(
-            user=user, jti=jti, live_time=settings.REFRESH_TOKEN_EXPIRE_MINUTES, token_type="refresh")
+            user=user,
+            jti=jti,
+            live_time=settings.REFRESH_TOKEN_EXPIRE_MINUTES,
+            token_type="refresh",
+        )
         refresh_token = generate_token(token_data=token_data)
-        token = TokennRedisModel(user_id=user.id, jti=jti, access=access_token, refresh=refresh_token)
+        token = TokennRedisModel(
+            user_id=user.id, jti=jti, access=access_token, refresh=refresh_token
+        )
         with RedisConnection(redis_url=settings.REDIS_URL) as redis_client:
             redis_client.set(jti, json.dumps(token.to_dict()))
             # Додаємо видалення зміної jti коли вийде час житя refresh токена
@@ -110,7 +121,9 @@ class StoreTokenRedis(BaseStoreToken):
             token = TokennRedisModel(**json.loads(redis_client.get(jti)))
             decoded_token = decode_token(token.refresh)
             user_db_service = UserDBService()
-            user = await user_db_service.get_user_by_email(email=decoded_token.get("email"))
+            user = await user_db_service.get_user_by_email(
+                email=decoded_token.get("email")
+            )
         return (token, user)
 
     async def update(self, jti: str) -> dict:
@@ -118,17 +131,27 @@ class StoreTokenRedis(BaseStoreToken):
             token = TokennRedisModel(**json.loads(redis_client.get(jti)))
             decoded_token = decode_token(token.refresh)
             user_db_service = UserDBService()
-            user = await user_db_service.get_user_by_email(email=decoded_token.get("email"))
+            user = await user_db_service.get_user_by_email(
+                email=decoded_token.get("email")
+            )
             token_data = generate_token_data(
-                user=user, jti=jti, live_time=settings.ACCESS_TOKEN_EXPIRE_MINUTES, token_type="access")
+                user=user,
+                jti=jti,
+                live_time=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+                token_type="access",
+            )
             token.access = generate_token(token_data)
             if settings.ROTATE_REFRESH_TOKEN:
                 token_data = generate_token_data(
-                    user=user, jti=jti, live_time=settings.REFRESH_TOKEN_EXPIRE_MINUTES, token_type="refresh")
+                    user=user,
+                    jti=jti,
+                    live_time=settings.REFRESH_TOKEN_EXPIRE_MINUTES,
+                    token_type="refresh",
+                )
                 token.refresh = generate_token(token_data)
             redis_client.set(jti, json.dumps(token.to_dict()))
             # Додаємо видалення зміної jti коли вийде час житя refresh токена
-            redis_client.expire(jti, settings.REFRESH_TOKEN_EXPIRE_MINUTES) 
+            redis_client.expire(jti, settings.REFRESH_TOKEN_EXPIRE_MINUTES)
         return (token, user)
 
     def delete(self, jti: str) -> None:

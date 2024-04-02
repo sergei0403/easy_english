@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete, insert
+from sqlalchemy import select, delete, insert  # update,
 
 from app.core.database import db
 from schemas.auth_schemas import RegisterSchema
@@ -8,6 +8,8 @@ from models import User
 class UserDBService:
     def __init__(self) -> None:
         self.__db_session = db
+        print("*" * 100)
+        print(self.__db_session._engine)
 
     async def get_user_by_email(self, email: str) -> User:
         query = await self.__db_session.execute(select(User).where(User.email == email))
