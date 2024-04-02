@@ -1,57 +1,64 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+import contextlib
+from typing import Any, AsyncIterator
+
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 
 
 Base = declarative_base()
 
 
-class AsyncDatabaseSession:
-    def __init__(self):
-        self._session = None
+class DatabaseSessionManager:
+    def __init__(self, host: str, engine_kwargs: dict[str, Any] = {}):
+        self._engine = create_async_engine(host, **engine_kwargs)
+        self._sessionmaker = async_sessionmaker(autocommit=False, bind=self._engine)
+
+    async def close(self):
+        if self._engine is None:
+            raise Exception("DatabaseSessionManager is not initialized")
+        await self._engine.dispose()
+
         self._engine = None
+        self._sessionmaker = None
 
-    def __getattr__(self, name):
-        return getattr(self._session, name)
+    @contextlib.asynccontextmanager
+    async def connect(self) -> AsyncIterator[AsyncConnection]:
+        if self._engine is None:
+            raise Exception("DatabaseSessionManager is not initialized")
 
-    def init(self):
-        self._engine = create_async_engine(
-            settings.DATABASE_DSN,
-            future=True,
-            echo=True,
-        )
-        self._session = sessionmaker(
-            self._engine, expire_on_commit=False, class_=AsyncSession
-        )()
+        async with self._engine.begin() as connection:
+            try:
+                yield connection
+            except Exception:
+                await connection.rollback()
+                raise
 
-    async def create_all(self):
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    @contextlib.asynccontextmanager
+    async def session(self) -> AsyncIterator[AsyncSession]:
+        if self._sessionmaker is None:
+            raise Exception("DatabaseSessionManager is not initialized")
 
-
-class TestDatabaseSession:
-    def __init__(self):
-        self._session = None
-        self._engine = None
-
-    def __getattr__(self, name):
-        return getattr(self._session, name)
-
-    def init(self):
-        self._engine = create_async_engine(
-            "sqlite+aiosqlite:///:memory:",
-            echo=True,
-        )
-        self._session = sessionmaker(
-            self._engine, class_=AsyncSession, expire_on_commit=False
-        )()
-
-    async def create_all(self):
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        session = self._sessionmaker()
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
 
-if settings.IS_TEST_DATABASE:
-    db = TestDatabaseSession()
-else:
-    db = AsyncDatabaseSession()
+sessionmanager = DatabaseSessionManager(
+    settings.DATABASE_DSN, {"echo": settings.ECHO_SQL}
+)
+
+
+async def get_db_session():
+    async with sessionmanager.session() as session:
+        yield session

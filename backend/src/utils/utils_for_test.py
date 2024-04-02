@@ -3,7 +3,7 @@ from services.user_service import UserDBService
 from storages.jwt_token_storage import StoreTokenRedis
 
 
-async def create_test_user():
+async def create_test_user(db):
     data = {
         "email": "example@example.com",
         "login": "example",
@@ -15,7 +15,7 @@ async def create_test_user():
 
     # Create an instance of RegisterSchema from the dictionary
     user_item = RegisterSchema.parse_obj(data)
-    user_service = UserDBService()
+    user_service = UserDBService(db)
     user = await user_service.get_user_by_email(email=user_item.email)
     if not user:
         await user_service.create_user(user_item=user_item)
@@ -23,8 +23,8 @@ async def create_test_user():
     return user
 
 
-async def remove_test_user(email: str) -> None:
-    user_service = UserDBService()
+async def remove_test_user(db, email: str) -> None:
+    user_service = UserDBService(db)
     await user_service.delete_user_by_email(email=email)
 
 
