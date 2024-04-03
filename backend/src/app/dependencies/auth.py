@@ -29,9 +29,10 @@ async def get_current_user(
             detail="Token expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     user_service = UserDBService(db_session=db_session)
     user = await user_service.get_user_by_email(email=decoded_token.get("email"))
-    print(f"{user=}")
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
