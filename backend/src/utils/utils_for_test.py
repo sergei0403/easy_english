@@ -1,5 +1,5 @@
 from sqlalchemy import StaticPool
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.server import app
 from app.core.database import get_db_session

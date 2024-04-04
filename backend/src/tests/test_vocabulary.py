@@ -4,7 +4,6 @@ from httpx import AsyncClient
 
 from app.server import app
 from utils.utils_for_test import (
-    TestSessionLocal,
     create_test_user,
     generate_test_token,
     remove_test_user,
