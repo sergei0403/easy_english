@@ -1,11 +1,12 @@
 from sqlalchemy import select, delete, insert  # update,
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from schemas.auth_schemas import RegisterSchema
 from models import User
 
 
 class UserDBService:
-    def __init__(self, db_session) -> None:
+    def __init__(self, db_session: AsyncSession) -> None:
         self.__db_session = db_session
 
     async def get_user_by_email(self, email: str) -> User:
