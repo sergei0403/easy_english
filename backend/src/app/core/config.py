@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     DATABASE_DSN: str = (
         f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    ECHO_SQL: bool = True
 
     REDIS_URL: str = os.environ.get("REDIS_URL", "redis://:redispass@redis:6379/0")
 

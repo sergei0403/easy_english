@@ -6,7 +6,7 @@ from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.core.database import db
+from app.core.database import sessionmanager
 from models import Admin as AdminModel
 from utils.password import verify_password
 from utils.jwt_token import generate_token
@@ -18,8 +18,11 @@ class AdminAuth(AuthenticationBackend):
         login, password = form["username"], form["password"]
 
         # Валідація username та password
-        query = await db.execute(select(AdminModel).where(AdminModel.login == login))
-        admin = query.scalars().first()
+        async with sessionmanager.session() as db:
+            query = await db.execute(
+                select(AdminModel).where(AdminModel.login == login)
+            )
+            admin = query.scalars().first()
         if not admin or not verify_password(
             password=password, hashed_pass=admin.password
         ):

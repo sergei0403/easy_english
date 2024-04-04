@@ -1,12 +1,11 @@
 from sqlalchemy import insert
 
-from app.core.database import db
 from models import Vocabulary
 
 
 class VocabularyDBService:
-    def __init__(self) -> None:
-        self.__db_session = db
+    def __init__(self, db_session) -> None:
+        self.__db_session = db_session
 
     async def create_vocabulary(self, item_dict: dict) -> None:
         await self.__db_session.execute(
