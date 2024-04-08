@@ -1,9 +1,8 @@
 from typing import Optional, Type
-from sqlalchemy import select, delete, insert  # update,
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_repositories.base_repositories import BaseDBRepository, ModelType
-from schemas.auth_schemas import RegisterSchema
 
 
 class UserRepository(BaseDBRepository):
