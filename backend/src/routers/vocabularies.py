@@ -63,7 +63,7 @@ async def create_vocabulary(
     db_session: DBSessionDep,
     user: AuthenticatedUser = Depends(get_current_user),
 ):
-    item_dict = item.dict()
+    item_dict = item.model_dump()
     item_dict["user_id"] = user.id
     await db_session.execute(
         insert(Vocabulary).values(
