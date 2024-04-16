@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app import models
 from app.core.database import Base
 
 
