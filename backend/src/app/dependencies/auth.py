@@ -1,14 +1,18 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from starlette.requests import Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db_session
 from schemas.auth_schemas import AuthenticatedUser
 from services.user_service import UserDBService
 from utils.jwt_token import check_expired_token, decode_token
 
 
 async def get_current_user(
-    request: Request, access_token: str = Depends(HTTPBearer())
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+    access_token: str = Depends(HTTPBearer()),
 ) -> AuthenticatedUser:
     decoded_token = decode_token(access_token.credentials)
 
@@ -26,7 +30,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user_service = UserDBService()
+    user_service = UserDBService(db_session=db_session)
     user = await user_service.get_user_by_email(email=decoded_token.get("email"))
 
     if not user:

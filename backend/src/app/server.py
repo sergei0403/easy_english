@@ -1,32 +1,27 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.core.database import db
+from app.core.database import sessionmanager
 from app.admin import create_admin_pannel
 from routers import include_routes
 
 
 def init_app():
-    # Ініціалізація бази данних
-    db.init()
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """
+        Function that handles startup and shutdown events.
+        To understand more, read https://fastapi.tiangolo.com/advanced/events/
+        """
+        yield
+        if sessionmanager._engine is not None:
+            # Close the DB connection
+            await sessionmanager.close()
 
     # Ініціалізація застосунку FastAPI
-    _app = FastAPI(title=settings.PROJECT_NAME)
-
-    # Lifespan event handler for startup
-    # async def startup_event():
-    #     # Create database connections, etc.
-    #     await db.create_all()
-
-    # _app.add_event_handler("startup", startup_event)
-
-    # # Lifespan event handler for shutdown
-    # async def shutdown_event():
-    #     # Close database connections, etc.
-    #     await db.close()
-
-    # _app.add_event_handler("shutdown", shutdown_event)
+    _app = FastAPI(lifespan=lifespan, title=settings.PROJECT_NAME, docs_url="/api/docs")
 
     # Налаштування CORS
     _app.add_middleware(

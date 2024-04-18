@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from app.dependencies.auth import get_current_user
+from app.dependencies.db import DBSessionDep
 from schemas.auth_schemas import (
     RegisterSchema,
     LoginSchema,
@@ -16,8 +17,8 @@ auth_router = APIRouter(prefix="/auth")
 
 
 @auth_router.post("/sign_up/", summary="Create new user")
-async def sign_up(user_item: RegisterSchema):
-    user_service = UserDBService()
+async def sign_up(user_item: RegisterSchema, db_session: DBSessionDep):
+    user_service = UserDBService(db_session=db_session)
     user = await user_service.get_user_by_email(email=user_item.email)
     if user:
         raise HTTPException(
@@ -38,8 +39,8 @@ async def sign_up(user_item: RegisterSchema):
 
 
 @auth_router.post("/sign_in/", summary="Login in system")
-async def sign_in(data: LoginSchema):
-    user_service = UserDBService()
+async def sign_in(data: LoginSchema, db_session: DBSessionDep):
+    user_service = UserDBService(db_session=db_session)
     user = await user_service.get_user_by_email(email=data.email)
     if not user:
         raise HTTPException(

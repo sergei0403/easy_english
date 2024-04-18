@@ -4,6 +4,7 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
     restart: always
     volumes:
       - ./backend/src:/src
