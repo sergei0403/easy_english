@@ -21,17 +21,6 @@ class UserDBService:
         user = None
         if not await self.get_user_by_email(email=insert_data.get("email")):
             user = await self.__repository.create(obj_in=insert_data)
-
-        # await self.__db_session.execute(
-        #     insert(User).values(
-        #         email=user_item.email,
-        #         login=user_item.login,
-        #         password=user_item.password,
-        #         first_name=user_item.first_name,
-        #         last_name=user_item.last_name,
-        #     )
-        # )
-        # await self.__db_session.commit()
         return user
 
     async def delete_user_by_email(self, email: str) -> None:

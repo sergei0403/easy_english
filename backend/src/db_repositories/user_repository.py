@@ -2,7 +2,7 @@ from typing import Optional, Type
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_repositories.base_repositories import BaseDBRepository, ModelType
+from db_repositories.base_repository import BaseDBRepository, ModelType
 
 
 class UserRepository(BaseDBRepository):

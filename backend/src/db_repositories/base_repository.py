@@ -183,4 +183,6 @@ class BaseDBRepository(Generic[ModelType]):
         )
         obj = response.scalar_one()
         await self.__db_session.delete(obj)
+        await self.__db_session.flush()
+        await self.__db_session.commit()
         return obj
