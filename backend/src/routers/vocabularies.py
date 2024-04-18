@@ -1,35 +1,10 @@
 from fastapi import APIRouter, Depends, Response
-from pydantic import BaseModel
-from sqlalchemy import select, update, delete, insert
-from sqlalchemy.orm import joinedload
 
 from app.dependencies.auth import get_current_user
 from app.dependencies.db import DBSessionDep
-from models import Vocabulary
 from schemas.auth_schemas import AuthenticatedUser
-
-
-class GetUser(BaseModel):
-    id: int
-    email: str
-    first_name: str
-    last_name: str
-
-    class Config:
-        from_attributes = True
-
-
-class CreateVocabularySchema(BaseModel):
-    name: str
-
-
-class GetVocabularySchema(BaseModel):
-    id: int
-    name: str
-    user: GetUser
-
-    class Config:
-        from_attributes = True
+from schemas.vocabularies import GetVocabularySchema, CreateVocabularySchema
+from services.vocabulary_service import VocabularyDBService
 
 
 vocabulary_router = APIRouter(prefix="/vocabularies")
@@ -39,22 +14,9 @@ vocabulary_router = APIRouter(prefix="/vocabularies")
 async def get_user_vocabularis(
     db_session: DBSessionDep, user: AuthenticatedUser = Depends(get_current_user)
 ):
-    query = await db_session.execute(
-        select(Vocabulary)
-        .where(Vocabulary.user_id == user.id)
-        .options(joinedload(Vocabulary.user))
-    )
-    return query.scalars().all()
-
-
-@vocabulary_router.get("/", response_model=list[GetVocabularySchema])
-async def get_vocabularis(
-    db_session: DBSessionDep, user: AuthenticatedUser = Depends(get_current_user)
-):
-    query = await db_session.execute(
-        select(Vocabulary).options(joinedload(Vocabulary.user))
-    )
-    return query.scalars().all()
+    vocabulary_service = VocabularyDBService(db_session=db_session)
+    query = await vocabulary_service.get_user_vocabularies(user_id=user.id)
+    return query
 
 
 @vocabulary_router.post("/")
@@ -63,14 +25,10 @@ async def create_vocabulary(
     db_session: DBSessionDep,
     user: AuthenticatedUser = Depends(get_current_user),
 ):
-    item_dict = item.dict()
+    item_dict = item.model_dump()
     item_dict["user_id"] = user.id
-    await db_session.execute(
-        insert(Vocabulary).values(
-            name=item_dict.get("name"), user_id=item_dict.get("user_id")
-        )
-    )
-    await db_session.commit()
+    vocabulary_services = VocabularyDBService(db_session=db_session)
+    await vocabulary_services.create_vocabulary(item=item_dict)
     return Response(status_code=201)
 
 
@@ -81,17 +39,8 @@ async def update_vocabulary(
     db_session: DBSessionDep,
     user: AuthenticatedUser = Depends(get_current_user),
 ):
-    existing_vocabulary = await db_session.execute(
-        select(Vocabulary).where(Vocabulary.id == vocabulary_id)
-    )
-    if existing_vocabulary is None:
-        return Response(status_code=404, content="Vocabulary not found")
-
-    # Update the vocabulary item with the new data
-    await db_session.execute(
-        update(Vocabulary).where(Vocabulary.id == vocabulary_id).values(name=item.name)
-    )
-    await db_session.commit()
+    vocabulary_service = VocabularyDBService(db_session=db_session)
+    await vocabulary_service.update_vocabulary(item=item, vocabulary_id=vocabulary_id)
     return Response(status_code=204)
 
 
@@ -101,11 +50,6 @@ async def delete_vocabulary(
     db_session: DBSessionDep,
     user: AuthenticatedUser = Depends(get_current_user),
 ):
-    existing_vocabulary = await db_session.execute(
-        delete(Vocabulary).where(
-            Vocabulary.id == vocabulary_id, Vocabulary.user_id == user.id
-        )
-    )
-    if existing_vocabulary is None:
-        return Response(status_code=404, content="Vocabulary not found")
+    vocabulary_service = VocabularyDBService(db_session=db_session)
+    await vocabulary_service.delete_vocabularies_by_id(id=vocabulary_id)
     return Response(status_code=201)

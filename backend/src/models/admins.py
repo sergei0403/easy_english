@@ -1,13 +1,14 @@
 from app.core.database import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Admin(Base):
-    __tablename__ = "admins"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(100), index=True)
-    login = Column(String(100), index=True)
-    password = Column(String(255))
+    __tablename__ = "admins_table"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    email: Mapped[str] = mapped_column(index=True, unique=True)
+    login: Mapped[str] = mapped_column(index=True, unique=True)
+    password: Mapped[str]
 
     def __repr__(self) -> str:
         return f"<Admin id={self.id} email={self.email}>"

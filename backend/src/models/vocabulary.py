@@ -1,20 +1,23 @@
-from sqlalchemy import String, Column, Integer, ForeignKey, JSON
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, JSON
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+import models
 
 
 class Vocabulary(Base):
-    __tablename__ = 'vocabularies'
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(225))
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("models.users.User", back_populates="vocabularies")
+    __tablename__ = "vocabularies_table"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    name: Mapped[str]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users_table.id"))
+    user: Mapped["models.users.User"] = relationship(back_populates="vocabularies")
 
 
 class Words(Base):
-    __tablename__ = 'words'
-    id = Column(Integer, primary_key=True, index=True)
-    english_phrase = Column(String(225))
-    slug = Column(String(255), index=True)
-    translations_list = Column(JSON)
+    __tablename__ = "words_table"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    english_phrase: Mapped[str]
+    slug: Mapped[str] = mapped_column(index=True, unique=True)
+    translations_list: Mapped[JSON] = mapped_column(type_=JSON, nullable=False)

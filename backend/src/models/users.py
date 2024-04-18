@@ -1,19 +1,23 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from typing import List
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+import models
 
 
 class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(100), index=True)
-    login = Column(String(20))
-    password = Column(String(255))
-    first_name = Column(String)
-    last_name = Column(String)
+    __tablename__ = "users_table"
 
-    vocabularies = relationship("models.vocabulary.Vocabulary", back_populates="user")
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    email: Mapped[str] = mapped_column(index=True, unique=True)
+    login: Mapped[str] = mapped_column(index=True, unique=True)
+    password: Mapped[str]
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+
+    vocabularies: Mapped[List["models.vocabulary.Vocabulary"]] = relationship(
+        back_populates="user"
+    )
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email}>"
