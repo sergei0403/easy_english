@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, List
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +11,7 @@ class VocabularyRepository(BaseDBRepository):
         super().__init__(model=model, db_session=db_session)
         self.__db_session = self.get_db()
 
-    async def get_user_vocabularies(self, user_id: int):
+    async def get_user_vocabularies(self, user_id: int) -> List[ModelType]:
         query = await self.__db_session.execute(
             select(self.model)
             .where(self.model.user_id == user_id)

@@ -1,5 +1,4 @@
 import pytest
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 from app.server import app
@@ -10,8 +9,6 @@ from utils.utils_for_test import (
     setup,
     teardown,
 )
-
-client = TestClient(app)
 
 
 @pytest.mark.asyncio
